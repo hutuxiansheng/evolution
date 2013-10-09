@@ -45,7 +45,7 @@ class Examination < ActiveRecord::Base
     after_transition :on => :all_feedbacked do |exam, transition|
       exam.finished_at = Time.zone.now
       exam.save
-      exam.creator.todos.create!(:source => exam, :todo_type => 'pending_finish', :deadline =>exam.set_day(exam.deadline, 3.day)) if exam.creator
+      exam.creator.todos.create!(:source => exam, :todo_type => 'finished', :deadline =>exam.set_day(exam.deadline, 3.day)) if exam.creator
     end
 
     after_transition :on => :cancel do |exam, transition|
@@ -56,7 +56,7 @@ class Examination < ActiveRecord::Base
     after_transition :on => :feedback_timeout do |exam, transition|
       exam.finished_at = exam.deadline
       exam.save
-      creator.todos.create!(:source => exam, :todo_type => 'pending_finish', :deadline =>exam.set_day(self.deadline, 3.day)) if exam.creator
+      creator.todos.create!(:source => exam, :todo_type => 'finished', :deadline =>exam.set_day(self.deadline, 3.day)) if exam.creator
     end
 
     after_transition :on => :publish do |exam, transition|
@@ -68,7 +68,8 @@ class Examination < ActiveRecord::Base
       end
     end
 
-    after_transition :on => :complete do |exam|
+    after_transition :on => :complete do |exam, transition|
+      exam.creator.todos.where(:source_type => exam.class.name, :source_id => exam.id).first.update_attribute(:finish_at, Time.zone.now)
       exam.users.each do |user|
         exam.notifications.create!(:user_id => user.id, :notification_type => "completed") if user
       end
@@ -91,7 +92,7 @@ class Examination < ActiveRecord::Base
     end
 
     event :complete do
-      transition :pending_finish => :completed
+      transition :finished => :completed
     end
 
   end
@@ -125,6 +126,13 @@ class Examination < ActiveRecord::Base
     ur.todos.where(:source_type => "Examination", :source_id => self.id).first if ur
   end
 
+  def feedback_check_state(feedback)
+    if self.feedbacks.where(:state => nil).first.nil?
+      puts "feedback_check_state"
+      self.complete
+    end
+  end
+
   def feedback_created(feedback)
     if self.feedbacks.count == self.users.count
       self.all_feedbacked
@@ -139,6 +147,10 @@ class Examination < ActiveRecord::Base
     self.questions.all.each do |question|
        question.user_answers.create!(:examination_feedback_id => examfeed_id)
     end
+  end
+
+  def  quesiton_user_answer(fid, qid)
+    UserAnswer.get_quesiton_answer(fid).get_all_answer(qid).first
   end
 
   def answer_kind_num(type, qid)

@@ -17,7 +17,6 @@ class ExamFeedbacksController < ApplicationController
     @exam = Examination.find(params[:examination_id])
     @exam_feedback = ExaminationFeedback.find(params[:id])
     #@paper = @exam.check_user_paper(@exam_feedback.id)
-
   end
 
   def create
@@ -39,12 +38,24 @@ class ExamFeedbacksController < ApplicationController
   end
 
   def index
-    @exam = Examination.find(params[:examination_id])
-
     if current_user.admin?
-
+      @exam = Examination.find(params[:examination_id])
     else
+    end
+  end
 
+  def update
+    if current_user.admin?
+      @exam = Examination.find(params[:examination_id])
+      unless @exam.nil?
+        @exam_feedback = @exam.feedbacks.find(params[:id])
+        mode = params[:examination_feedback][:state].eql?("true") ? true : false
+        @exam_feedback.update_attribute(:state, mode)
+      end
+    end
+    respond_to do |format|
+      format.html { redirect_to :back}
+      format.json { head :no_content }
     end
   end
 

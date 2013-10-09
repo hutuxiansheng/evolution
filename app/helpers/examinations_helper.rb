@@ -9,6 +9,8 @@ module ExaminationsHelper
     when "published"
       result_examination_path(exam)
     when "finished"
+      current_user.admin? ? examination_exam_feedbacks_path(:examination_id => exam.id) : "#mymode"
+    when "completed"
       result_examination_path(exam)
     else
       "#myMode"
@@ -22,7 +24,9 @@ module ExaminationsHelper
     when "published"
       "取消考试"
     when "finished"
-      "查看考试结果"
+      "等待批阅"
+    when "completed"
+      "查看结果"
     else
       "未知状态"
     end
@@ -35,7 +39,9 @@ module ExaminationsHelper
     when "published"
       "已发布"
     when "finished"
-      "已结束"
+      "等待批阅"
+    when "completed"
+      "已经结束"
     when "cancelled"
       "已取消"
     else
@@ -50,6 +56,8 @@ module ExaminationsHelper
     when "published"
       "#myMode"
     when "finished"
+      current_user.admin? ? examination_exam_feedbacks_path(:examination_id => exam.id) : "#mymode"
+    when "completed"
       result_examination_path(exam)
     else
       "#myMode"

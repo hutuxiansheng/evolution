@@ -11,40 +11,65 @@
 
 <div class="row-fluid">
   <div id="dashboard-left" class="span8">
-    <div class="widgetcontent nopadding">
-      <h4 class="widgettitle">考试结果</h4>
-      <div>
-        <p>考试总题数： <%= @exam.questions.size %></p>
-        <p>答对题数：<%= @exam_feedback.get_answer_result(true).size %> </p>
-        <p>答错题数：<%= @exam_feedback.get_answer_result(false).size %> </p>
-        <p> 问答题：<%= @exam_feedback.get_dialogical_result.size %></p>
-      </div>
-    </div>
+    <div class="well exam-details-progress">
+      <h4>考卷详情</h4>
+      <h5>选择题（<%= @exam.get_choice_question.count %>）</h5>
+      <ul class="exam-course-progress-list">
+        <% @exam.get_choice_question.each_with_index do |cq, idx| %>
+        <li class='question-title'>
+          <span><%= idx + 1 %>. <%= cq.title %></span>
+        </li>
+        <% cq.options.each_with_index  do |op, index| %>
+        <li class='question-option'>
+          <span class='option-content'><%= '[选项-' + (index+1).to_s + ']: ' + op.content %><%= content_tag :i, nil, :class => 'iconfa-check' if cq.answer.to_i == index %></span>
+            <span class='label label-info'><%= '考生' if @exam.quesiton_user_answer(@exam_feedback.id, cq.id).content.to_i == index%></span>
+        </li>
+        <% end %>
+        <% end %>
+      </ul>
 
-    <div class="widgetcontent nopadding">
-      <% if @exam_feedback.feedback_todo %>
-        <h4 class="widgettitle">等待处理题目</h4>
-        <div>
-          <% if @exam_feedback.feedback_todo.todo_type == "pending_finish" %>
-            <% @exam_feedback.get_dialogical_result.each do |answer| %>
-              <tr>
-                <td width="1%"><%= get_question_index(@exam, answer.question, "dialogical") %>、</td>
-                <td width="70%">
-                  <%= eo_markdown(answer.question.qdata) %>
-                  考生答案：<%= eo_markdown(answer.content) %>
-                  参考答案：<%= eo_markdown(answer.question.answer) %>
-                </td>
-              </tr>
-            <% end %>
-          <% end %>
+      <h5>判断题（<%= @exam.get_judgement_question.count %>）</h5>
+      <ul class="exam-course-progress-list">
+        <% @exam.get_judgement_question.each_with_index do |cq, idx| %>
+        <li class='question-title'>
+          <span class='qustion-title'>[<%= idx + 1 %>]: <%= cq.title %></span>
+        </li>
+        <% get_option_type(cq).each do |key, value|%>
+        <li class='question-option'>
+          <span class='option-content'>[选项]: <%= key %> <%= content_tag :i, nil, :class => 'iconfa-check' if cq.answer == value %></span>
+          <span class='label label-info'><%= '考生' if @exam.quesiton_user_answer(@exam_feedback.id, cq.id).content == value  %></span>
+        </li>
+        <% end %>
+        <% end %>
+      </ul>
+
+      <h5>简答题（<%= @exam.get_dialogical_question.count %>）</h5>
+      <ul class="tp-course-progress-list">
+        <% @exam.get_dialogical_question.each_with_index do |cq, idx| %>
+        <li>
+          <span class='qustion-title'>[<%= idx + 1 %>]: <%= cq.title %></span>
+        </li>
+        <li>
+          <span class='qustion-title'>[<%= @exam_feedback.user.name %>]: <%= @exam.quesiton_user_answer(@exam_feedback.id, cq.id).content %></span>
+        </li>
+        <% end %>
+      </ul>
+    </div>
+  <div class="well exam-details-progress">
+    <h4>考试详细信息</h4>
+    <h5>考试总题数：<%= @exam.questions.size %><h5>
+    <h5>答对题数  : <%=  @exam_feedback.get_answer_result(true).size %><h5>
+    <h5>答错题数  ：<%= @exam_feedback.get_answer_result(false).size %><h5>
+    <% if @exam_feedback.state.nil? %>
+      <%= form_for(@exam_feedback, :url => examination_exam_feedback_path(@exam, @exam_feedback), html: { :method => :put }) do |f| %>
+        <%= f.collection_radio_buttons  :state,[[true, '通过考试'] ,[false, '不通过考试']], :first, :last %>
+        <div class="form-actions">
+           <%= f.submit "批阅试卷" %>
         </div>
-      <% else %>
-
       <% end %>
-
-    </div>
-
+    <% else %>
+      <h5>考试结果：<%= @exam_feedback.state ? "通过" : "未通过"%></h5>
+    <% end %>
   </div>
-    
   </div>
 </div>

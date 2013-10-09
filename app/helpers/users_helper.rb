@@ -49,7 +49,7 @@ module UsersHelper
         "请及时参加考试：" + todo.source.title
       elsif todo.todo_type == 'examination_pending'
         "考试管理：" + todo.source.title + "即将发布"
-      elsif todo.todo_type == 'pending_finish'
+      elsif todo.todo_type == 'finished'
         #todo.source.user.name + " 已经完成\"" + todo.source.examination.title + "\"考试"
         "\"" + todo.source.title + "\"考试已近结束,考卷需要批改"
       end
@@ -75,11 +75,8 @@ module UsersHelper
         examinations_path()
       elsif todo.todo_type == 'published'
         new_examination_exam_feedback_path(todo.source)
-      elsif todo.todo_type == 'pending_finish'
+      elsif todo.todo_type == 'finished'
         examination_exam_feedbacks_path(:examination_id => todo.source.id)
-        #exam_id = todo.source.examination.id
-        #feedback_id = todo.source.examination_feedback.id
-        #examination_exam_feedback_path(:examination_id => exam_id, :id => feedback_id)
       end
     else
       # unknow action TODO

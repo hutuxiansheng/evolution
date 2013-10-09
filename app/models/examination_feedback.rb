@@ -12,6 +12,7 @@
 class ExaminationFeedback < ActiveRecord::Base
   attr_accessible :examination_id, :user_id
   attr_accessible :score
+  attr_accessible :state
 
   validates :examination_id, :presence => true
   validates :user_id, :presence => true
@@ -45,6 +46,7 @@ class ExaminationFeedback < ActiveRecord::Base
   end
 
   after_create :clear_feedback_todo, :feedback_callback
+  after_update :check_examination_state
 
   private
     def clear_feedback_todo
@@ -53,6 +55,11 @@ class ExaminationFeedback < ActiveRecord::Base
 
     def feedback_callback
       examination.feedback_created(self)
+    end
+
+    def check_examination_state
+      puts "check_examination_state"
+      examination.feedback_check_state(self)
     end
 
 end

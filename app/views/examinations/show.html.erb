@@ -37,7 +37,7 @@
             <% elsif q.question_type_str.to_s == 'judgement' %>
             <ul class='option-list-judgement'>
               <li class='options'>正确<%= content_tag :i, nil, :class => 'iconfa-check' if q.answer == "true" %></li>
-              <li class='options'>错误<%= content_tag :i, nil, :class => 'iconfa-check' if q.answer == "true" %></li>
+              <li class='options'>错误<%= content_tag :i, nil, :class => 'iconfa-check' if q.answer == "false" %></li>
             </ul>
             <% else %>
             <h6>参考答案：</h6>

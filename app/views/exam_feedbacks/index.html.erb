@@ -14,16 +14,16 @@
 
 <div class="row-fluid">
   <div id="dashboard-left" class="span8">
-    <h4 class="widgettitle"><%= @exam.title %>-待阅试题（<%= @exam.feedbacks.count %>）</h4>
-    <% if @exam.get_dialogical_question.count > 0 %>
+    <h4 class="widgettitle"><%= @exam.title %>-待阅考卷（<%= @exam.feedbacks.count %>）</h4>
+    <% if @exam.feedbacks.count > 0 %>
     <div class="widgetcontent nopadding">
-      <ul class="tp-course-progress-list">
-        <% @exam.get_dialogical_question.each_with_index do |cq, idx| %>
-          <li><span class='qustion-title'>[<%= idx + 1 %>]: <%= cq.title %></span></li>
-          <li><span class='question-title'>[参考答案]: <%= cq.answer %></span></li>
-           <% @exam.answer_all_num(cq.id).each do |asw|  %>
-            <li><span class='qustion-title'>[<%= asw.examination_feedback.user.name %>]: <%= asw.content %></span></li>
-           <% end %>
+      <ul class="exam-list">
+        <% @exam.feedbacks.each do |fb| %>
+          <li>
+            <%= link_to fb.user.name %>
+            <span>的考卷</span>
+            <span class='pull-right'><%= link_to exam_feedback_state(fb.state), examination_exam_feedback_path(@exam.id, fb.id), :class => "btn btn-warning btn-small" %></span>
+          </li>
         <% end %>
       </ul>
     </div>

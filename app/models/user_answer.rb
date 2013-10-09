@@ -23,5 +23,6 @@ class UserAnswer < ActiveRecord::Base
   scope :answer_result, lambda {|state| where(:correct => state)}
   scope :get_user_answer, lambda{|type| where(:content => type)}
   scope :get_all_answer, lambda{|qid| where(:question_id => qid) }
+  scope :get_quesiton_answer, lambda{|fbid| where(:examination_feedback_id => fbid)}
 
 end
